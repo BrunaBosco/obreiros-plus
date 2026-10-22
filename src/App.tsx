@@ -64,16 +64,36 @@ export default function App() {
     setChurches(updatedChurches)
   }
 
-  function handleToggleChurch(id: string) {
-  const updatedChurches = churches.map((church) =>
-    church.id === id
-      ? { ...church, active: !church.active }
-      : church,
+  
+function handleToggleChurch(id: string) {
+  const church = churches.find((item) => item.id === id)
+
+  if (!church) return
+
+  if (church.active) {
+    const linkedPeople = people.filter(
+      (person) => person.churchId === id,
+    )
+
+    if (linkedPeople.length > 0) {
+      const confirmed = window.confirm(
+        `Esta igreja possui ${linkedPeople.length} obreiro(s) vinculado(s). Deseja desativá-la mesmo assim? Os vínculos e históricos serão preservados.`,
+      )
+
+      if (!confirmed) return
+    }
+  }
+
+  const updatedChurches = churches.map((item) =>
+    item.id === id
+      ? { ...item, active: !item.active }
+      : item,
   )
 
   storage.saveChurches(updatedChurches)
   setChurches(updatedChurches)
 }
+
 
   function handleSelectPerson(person: Person) {
     setSelectedPerson(person)
