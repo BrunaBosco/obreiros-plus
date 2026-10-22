@@ -62,6 +62,7 @@ export default function Dashboard({
     attendanceByPerson[record.personId] = record.status
   })
 
+  
   const counts = {
     total: people.length,
     presentes: currentAttendance.filter(
@@ -73,10 +74,15 @@ export default function Dashboard({
     faltas: currentAttendance.filter(
       (record) => record.status === 'falta',
     ).length,
-    pendentes: people.length - currentAttendance.filter(
-      (record) => record.status !== 'pendente',
-    ).length,
+    pendentes: people.filter((person) => {
+      const record = currentAttendance.find(
+        (item) => item.personId === person.id,
+      )
+
+      return !record || record.status === 'pendente'
+    }).length,
   }
+
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
