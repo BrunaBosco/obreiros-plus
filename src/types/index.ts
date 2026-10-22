@@ -7,6 +7,7 @@ export type AttendanceStatus =
 export interface Church {
   id: string
   name: string
+  active: boolean
 }
 
 export interface Person {

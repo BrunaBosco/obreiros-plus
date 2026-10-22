@@ -33,8 +33,13 @@ function saveData<T>(key: string, data: T): void {
 
 export const storage = {
   getChurches(): Church[] {
-    return readData(KEYS.churches, initialChurches)
-  },
+  const churches = readData<Church[]>(KEYS.churches, initialChurches)
+
+  return churches.map((church) => ({
+    ...church,
+    active: church.active ?? true,
+  }))
+},
 
   saveChurches(churches: Church[]): void {
     saveData(KEYS.churches, churches)

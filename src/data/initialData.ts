@@ -2,9 +2,9 @@
 import type { Church, Person } from '../types'
 
 export const initialChurches: Church[] = [
-  { id: 'sede', name: 'Sede' },
-  { id: 'jardim-aurelio', name: 'Jardim Aurélio' },
-  { id: 'jardim-da-luz', name: 'Jardim da Luz' },
+  { id: 'sede', name: 'Sede', active: true },
+  { id: 'jardim-aurelio', name: 'Jardim Aurélio', active: true },
+  { id: 'jardim-da-luz', name: 'Jardim da Luz', active: true },
 ]
 
 export const initialPeople: Person[] = [

@@ -4,59 +4,107 @@ import Header from './components/Header'
 import AttendanceModal from './components/AttendanceModal'
 import Dashboard from './pages/Dashboard'
 import AttendanceHistory from './pages/AttendanceHistory'
+import Meetings from './pages/Meetings'
+import Obreiros from './pages/Obreiros'
+import Igrejas from './pages/Igrejas'
 import { initialChurches, initialPeople } from './data/initialData'
 import { storage } from './services/storage'
-import type { AttendanceStatus, Meeting, Person } from './types'
-import Meetings from './pages/Meetings'
+import type { AttendanceStatus, Church, Meeting, Person } from './types'
 
-type Page = 'reuniao' | 'historico' | 'reunioes'
+type Page = 'reuniao' | 'historico' | 'reunioes' | 'obreiros' | 'igrejas'
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('reuniao')
-
-  const [selectedPerson, setSelectedPerson] =
-    useState<Person | null>(null)
-
-  const [churches] = useState(() => storage.getChurches())
-  const [people] = useState(() => storage.getPeople())
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null)
+  const [churches, setChurches] = useState(() => storage.getChurches())
+  const [people, setPeople] = useState(() => storage.getPeople())
   const [meetings, setMeetings] = useState(() => storage.getMeetings())
-  const [selectedMeetingId, setSelectedMeetingId] = useState<string | undefined>(
-  () => {
+  const [attendance, setAttendance] = useState(() => storage.getAttendance())
+
+  const [selectedMeetingId, setSelectedMeetingId] = useState<
+    string | undefined
+  >(() => {
     const savedMeetings = storage.getMeetings()
     const latestMeeting = [...savedMeetings].sort((a, b) =>
       b.date.localeCompare(a.date),
     )[0]
 
     return latestMeeting?.id
-  },
-)
-  const [attendance, setAttendance] = useState(
-    () => storage.getAttendance(),
-  )
+  })
 
   const fallbackData = {
     churches: initialChurches,
     people: initialPeople,
   }
 
-  const displayedChurches = churches.length
-    ? churches
-    : fallbackData.churches
-
-  const displayedPeople = people.length
-    ? people
-    : fallbackData.people
+  const displayedChurches = churches.length ? churches : fallbackData.churches
+  const displayedPeople = people.length ? people : fallbackData.people
 
   const latestMeeting = [...meetings].sort((a, b) =>
-  b.date.localeCompare(a.date),
-)[0]
+    b.date.localeCompare(a.date),
+  )[0]
 
-const selectedMeeting =
-  meetings.find((meeting) => meeting.id === selectedMeetingId) ??
-  latestMeeting
+  const selectedMeeting =
+    meetings.find((meeting) => meeting.id === selectedMeetingId) ??
+    latestMeeting
+
+  function handleAddChurch(church: Church) {
+    const updatedChurches = [...churches, church]
+
+    storage.saveChurches(updatedChurches)
+    setChurches(updatedChurches)
+  }
+
+  function handleEditChurch(id: string, name: string) {
+    const updatedChurches = churches.map((church) =>
+      church.id === id ? { ...church, name } : church,
+    )
+
+    storage.saveChurches(updatedChurches)
+    setChurches(updatedChurches)
+  }
+
+  function handleToggleChurch(id: string) {
+  const updatedChurches = churches.map((church) =>
+    church.id === id
+      ? { ...church, active: !church.active }
+      : church,
+  )
+
+  storage.saveChurches(updatedChurches)
+  setChurches(updatedChurches)
+}
 
   function handleSelectPerson(person: Person) {
     setSelectedPerson(person)
+  }
+
+  function handleAddPerson(personData: Omit<Person, 'id'>) {
+    const newPerson: Person = {
+      ...personData,
+      id: crypto.randomUUID(),
+    }
+
+    const updatedPeople = [...people, newPerson]
+
+    storage.savePeople(updatedPeople)
+    setPeople(updatedPeople)
+  }
+
+  function handleUpdatePerson(updatedPerson: Person) {
+    const updatedPeople = people.map((person) =>
+      person.id === updatedPerson.id ? updatedPerson : person,
+    )
+
+    storage.savePeople(updatedPeople)
+    setPeople(updatedPeople)
+  }
+
+  function handleDeletePerson(personId: string) {
+    const updatedPeople = people.filter((person) => person.id !== personId)
+
+    storage.savePeople(updatedPeople)
+    setPeople(updatedPeople)
   }
 
   function handleRegisterAttendance(
@@ -70,8 +118,7 @@ const selectedMeeting =
 
     const existingRecord = existingAttendance.find(
       (record) =>
-        record.meetingId === meetingId &&
-        record.personId === personId,
+        record.meetingId === meetingId && record.personId === personId,
     )
 
     const updatedRecord = {
@@ -86,9 +133,7 @@ const selectedMeeting =
 
     const updatedAttendance = existingRecord
       ? existingAttendance.map((record) =>
-          record.id === existingRecord.id
-            ? updatedRecord
-            : record,
+          record.id === existingRecord.id ? updatedRecord : record,
         )
       : [...existingAttendance, updatedRecord]
 
@@ -116,6 +161,7 @@ const selectedMeeting =
       storage.saveMeetings(updatedMeetings)
       setMeetings(updatedMeetings)
       meetingToUse = newMeeting
+      setSelectedMeetingId(newMeeting.id)
     }
 
     handleRegisterAttendance(
@@ -136,12 +182,13 @@ const selectedMeeting =
         onNavigate={setCurrentPage}
         meetingDate={
           selectedMeeting
-            ? new Date(`${selectedMeeting.date}T12:00:00`).toLocaleDateString('pt-BR')
+            ? new Date(`${selectedMeeting.date}T12:00:00`).toLocaleDateString(
+                'pt-BR',
+              )
             : 'Nenhuma reunião cadastrada'
         }
       />
 
-      
       {currentPage === 'reuniao' ? (
         <Dashboard
           churches={displayedChurches}
@@ -159,24 +206,39 @@ const selectedMeeting =
           meetings={meetings}
           attendance={attendance}
         />
-      ) : (
+      ) : currentPage === 'reunioes' ? (
         <Meetings
-  meetings={meetings}
-  selectedMeetingId={selectedMeetingId}
-  onSelectMeeting={(meeting) => {
-    const exists = meetings.some((item) => item.date === meeting.date)
+          meetings={meetings}
+          selectedMeetingId={selectedMeetingId}
+          onSelectMeeting={(meeting) => {
+            const exists = meetings.some((item) => item.date === meeting.date)
 
-    if (!exists) {
-      const updatedMeetings = [...meetings, meeting]
-      storage.saveMeetings(updatedMeetings)
-      setMeetings(updatedMeetings)
-    }
+            if (!exists) {
+              const updatedMeetings = [...meetings, meeting]
 
-    setSelectedMeetingId(meeting.id)
-  }}
-/>
+              storage.saveMeetings(updatedMeetings)
+              setMeetings(updatedMeetings)
+            }
+
+            setSelectedMeetingId(meeting.id)
+          }}
+        />
+      ) : currentPage === 'obreiros' ? (
+        <Obreiros
+          people={displayedPeople}
+          churches={displayedChurches}
+          onAddPerson={handleAddPerson}
+          onUpdatePerson={handleUpdatePerson}
+          onDeletePerson={handleDeletePerson}
+        />
+      ) : (
+        <Igrejas
+          churches={churches}
+          onAddChurch={handleAddChurch}
+          onEditChurch={handleEditChurch}
+          onToggleChurch={handleToggleChurch}
+        />
       )}
-
 
       {currentPage === 'reuniao' && selectedPerson && (
         <AttendanceModal
@@ -189,14 +251,14 @@ const selectedMeeting =
           currentStatus={
             attendance.find(
               (item) =>
-                item.meetingId === latestMeeting?.id &&
+                item.meetingId === selectedMeeting?.id &&
                 item.personId === selectedPerson.id,
             )?.status ?? 'pendente'
           }
           currentJustification={
             attendance.find(
               (item) =>
-                item.meetingId === latestMeeting?.id &&
+                item.meetingId === selectedMeeting?.id &&
                 item.personId === selectedPerson.id,
             )?.justification ?? ''
           }
