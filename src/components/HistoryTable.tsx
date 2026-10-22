@@ -1,4 +1,3 @@
-
 import type { Attendance, Meeting, Person } from '../types'
 
 interface HistoryTableProps {
@@ -43,13 +42,25 @@ export default function HistoryTable({
     a.date.localeCompare(b.date),
   )
 
-  function findStatus(personId: string, meetingId: string) {
-    return attendance.find(
+  
+function findStatus(personId: string, meetingId: string) {
+  const meeting = meetings.find((item) => item.id === meetingId)
+
+  if (!meeting) return null
+
+  const today = new Date().toISOString().slice(0, 10)
+
+  if (meeting.date > today) return null
+
+  return (
+    attendance.find(
       (item) =>
         item.personId === personId &&
         item.meetingId === meetingId,
     )?.status ?? 'pendente'
-  }
+  )
+}
+
 
   if (sortedMeetings.length === 0) {
     return (
@@ -103,13 +114,15 @@ export default function HistoryTable({
 
               {sortedMeetings.map((meeting) => {
                 const status = findStatus(person.id, meeting.id)
-                const config = statusSymbols[status]
+                const config = status ? statusSymbols[status] : null
 
                 return (
                   <td
                     key={meeting.id}
                     className="border-b border-slate-100 px-4 py-3 text-center"
                   >
+                    
+                  {config ? (
                     <span
                       title={config.label}
                       aria-label={`${person.name}: ${config.label} em ${meeting.name}`}
@@ -117,6 +130,8 @@ export default function HistoryTable({
                     >
                       {config.symbol}
                     </span>
+                  ) : null}
+
                   </td>
                 )
               })}
