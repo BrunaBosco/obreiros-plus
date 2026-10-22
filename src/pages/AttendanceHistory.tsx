@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { History } from 'lucide-react'
 import HistoryTabs from '../components/HistoryTabs'
@@ -26,9 +25,41 @@ export default function AttendanceHistory({
     (person) => person.churchId === selectedChurchId,
   )
 
-  const churchAttendance = attendance.filter(
-    (record) => record.churchId === selectedChurchId,
-  )
+  const churchPersonIds = new Set(
+  churchPeople.map((person) => person.id),
+)
+
+const churchAttendance = attendance.filter(
+  (record) => churchPersonIds.has(record.personId),
+)
+
+const today = new Date()
+const currentYear = today.getFullYear()
+const currentMonth = today.getMonth()
+
+const getSecondMonday = (year: number, month: number): string => {
+  const date = new Date(year, month, 1)
+  const daysUntilMonday = (8 - date.getDay()) % 7
+
+  date.setDate(1 + daysUntilMonday + 7)
+
+  const yearString = date.getFullYear()
+  const monthString = String(date.getMonth() + 1).padStart(2, '0')
+  const dayString = String(date.getDate()).padStart(2, '0')
+
+  return `${yearString}-${monthString}-${dayString}`
+}
+
+const validMeetingDates = new Set(
+  Array.from(
+    { length: 12 - currentMonth },
+    (_, index) => getSecondMonday(currentYear, currentMonth + index),
+  ),
+)
+
+const monthlyMeetings = meetings.filter((meeting) =>
+  validMeetingDates.has(meeting.date),
+)
 
   const selectedChurch = churches.find(
     (church) => church.id === selectedChurchId,
@@ -65,13 +96,13 @@ export default function AttendanceHistory({
             {selectedChurch?.name ?? 'Congregação'}
           </h3>
           <p className="mt-1 text-sm text-slate-500">
-            {churchPeople.length} obreiro(s) · {meetings.length} reunião(ões)
+            {churchPeople.length} obreiro(s) · {monthlyMeetings.length} reunião(ões)
           </p>
         </div>
 
         <HistoryTable
           people={churchPeople}
-          meetings={meetings}
+          meetings={monthlyMeetings}
           attendance={churchAttendance}
         />
       </section>

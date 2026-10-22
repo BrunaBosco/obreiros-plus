@@ -1,5 +1,4 @@
-
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from './components/Header'
 import AttendanceModal from './components/AttendanceModal'
 import Dashboard from './pages/Dashboard'
@@ -20,7 +19,54 @@ export default function App() {
   const [people, setPeople] = useState(() => storage.getPeople())
   const [meetings, setMeetings] = useState(() => storage.getMeetings())
   const [attendance, setAttendance] = useState(() => storage.getAttendance())
+  useEffect(() => {
+  function getSecondMonday(year: number, month: number): string {
+    const date = new Date(year, month, 1)
+    const daysUntilMonday = (8 - date.getDay()) % 7
 
+    date.setDate(1 + daysUntilMonday + 7)
+
+    const monthString = String(date.getMonth() + 1).padStart(2, '0')
+    const dayString = String(date.getDate()).padStart(2, '0')
+
+    return `${date.getFullYear()}-${monthString}-${dayString}`
+  }
+
+  const savedMeetings = storage.getMeetings()
+
+  const validMeetings = savedMeetings.filter((meeting) => {
+    const [year, month] = meeting.date.split('-').map(Number)
+
+    return meeting.date === getSecondMonday(year, month - 1)
+  })
+
+  const validMeetingIds = new Set(
+    validMeetings.map((meeting) => meeting.id),
+  )
+
+  const savedAttendance = storage.getAttendance()
+
+  const validAttendance = savedAttendance.filter((record) =>
+    validMeetingIds.has(record.meetingId),
+  )
+
+  storage.saveMeetings(validMeetings)
+  storage.saveAttendance(validAttendance)
+
+  setMeetings(validMeetings)
+  setAttendance(validAttendance)
+
+  setSelectedMeetingId((currentId) => {
+    if (currentId && validMeetingIds.has(currentId)) {
+      return currentId
+    }
+
+    return [...validMeetings].sort((a, b) =>
+      b.date.localeCompare(a.date),
+    )[0]?.id
+  })
+}, [])
+  
   const [selectedMeetingId, setSelectedMeetingId] = useState<
     string | undefined
   >(() => {
@@ -170,18 +216,8 @@ function handleToggleChurch(id: string) {
     let meetingToUse: Meeting | undefined = selectedMeeting
 
     if (!meetingToUse) {
-      const newMeeting: Meeting = {
-        id: crypto.randomUUID(),
-        name: 'Reunião atual',
-        date: new Date().toISOString().slice(0, 10),
-      }
-
-      const updatedMeetings = [...meetings, newMeeting]
-
-      storage.saveMeetings(updatedMeetings)
-      setMeetings(updatedMeetings)
-      meetingToUse = newMeeting
-      setSelectedMeetingId(newMeeting.id)
+    window.alert('Selecione uma reunião na página Reuniões antes de registrar a presença.')
+    return
     }
 
     handleRegisterAttendance(
