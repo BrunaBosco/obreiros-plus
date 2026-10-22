@@ -1,0 +1,792 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  font-family: 'Inter', Arial, sans-serif;
+  color: #172b4d;
+  background: #f7f9fc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --blue: #2457a7;
+  --blue-dark: #173d78;
+  --blue-light: #eaf2ff;
+  --red: #d9303e;
+  --text: #172b4d;
+  --muted: #718096;
+  --border: #e4eaf2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+}
+
+button:focus-visible,
+.person-card:focus-visible {
+  outline: 3px solid #8bb8ff;
+  outline-offset: 3px;
+}
+
+.app {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 40px 48px;
+}
+
+/* Cabeçalho */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+}
+
+.page-header h1 {
+  margin: 10px 0 8px;
+  color: var(--text);
+  font-size: clamp(26px, 3vw, 36px);
+  letter-spacing: -1.2px;
+}
+
+.page-header p,
+.section-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.meeting-date {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 22px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.meeting-date span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.meeting-date strong {
+  font-size: 14px;
+}
+
+/* Resumo da reunião */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgb(23 43 77 / 3%);
+}
+
+.summary-card span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.summary-card strong {
+  color: var(--blue);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.summary-card:nth-child(4) strong {
+  color: var(--red);
+}
+
+/* Seção das igrejas */
+.church-section {
+  padding: 28px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgb(23 43 77 / 3%);
+}
+
+.section-heading {
+  margin-bottom: 24px;
+}
+
+.section-heading h2 {
+  margin: 0 0 8px;
+  font-size: 21px;
+}
+
+/* Abas das igrejas */
+.church-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+}
+
+.church-tab {
+  flex-shrink: 0;
+  padding: 13px 18px;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.2s, background 0.2s;
+}
+
+.church-tab:hover {
+  color: var(--blue);
+  background: #f7faff;
+}
+
+.church-tab.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+/* Grade de obreiros */
+.people-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+/* Card individual */
+.person-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgb(23 43 77 / 4%);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.person-card:hover {
+  border-color: #b8ccef;
+  box-shadow: 0 5px 16px rgb(23 43 77 / 8%);
+}
+
+/* Foto do obreiro */
+.person-photo {
+  display: block;
+  width: 68px;
+  height: 68px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 12px;
+  background: #edf2f7;
+  transition: filter 0.25s ease;
+}
+
+/* Foto em preto e branco após o registro */
+.person-photo.photo-registered {
+  filter: grayscale(100%) !important;
+}
+
+/* Informações do obreiro */
+.person-info {
+  min-width: 0;
+}
+
+.person-info h3 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.person-info > span:not(.attendance-status) {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Indicador de presença */
+.attendance-status {
+  display: table;
+  margin-top: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 10px !important;
+  font-weight: 700;
+}
+
+.attendance-status.presente {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.attendance-status.ausente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.attendance-status.falta {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Estado sem obreiros */
+.people-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.placeholder-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  color: var(--blue);
+  background: var(--blue-light);
+  border-radius: 14px;
+  font-size: 28px;
+}
+
+.people-placeholder h3 {
+  margin: 18px 0 8px;
+  font-size: 18px;
+}
+
+.people-placeholder p {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.people-placeholder span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Fundo escuro atrás da janela */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 20px;
+  background: rgb(15 23 42 / 55%);
+}
+
+/* Janela de registro */
+.modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 32px 24px;
+  text-align: center;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 20%);
+}
+
+/* Botão de fechar */
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  background: #f1f5f9;
+}
+
+/* Foto dentro da janela */
+.modal-photo {
+  display: block;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Nome da pessoa */
+.modal-content h2 {
+  margin: 16px 0 6px;
+  color: var(--text);
+  font-size: 22px;
+}
+
+.modal-content > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Opções de presença */
+.attendance-options {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.attendance-button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.2s;
+}
+
+.attendance-button:hover {
+  filter: brightness(0.93);
+  transform: translateY(-1px);
+}
+
+.attendance-button.present {
+  background: #16845b;
+}
+
+.attendance-button.absent {
+  background: #d97706;
+}
+
+.attendance-button.missing {
+  background: #dc3545;
+}
+
+/* Adaptação para telas médias */
+@media (max-width: 1100px) {
+  .people-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .person-card {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .person-photo {
+    width: 58px;
+    height: 58px;
+  }
+}
+
+/* Adaptação para tablets */
+@media (max-width: 900px) {
+  .app {
+    padding: 28px 24px;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Adaptação para celulares */
+@media (max-width: 700px) {
+  .people-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .person-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  .person-photo {
+    width: 100%;
+    height: 130px;
+    border-radius: 10px;
+  }
+
+  .person-info h3 {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 24px 16px;
+  }
+
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .meeting-date {
+    padding: 14px 16px;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .summary-card {
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .summary-card span {
+    font-size: 12px;
+  }
+
+  .summary-card strong {
+    font-size: 26px;
+  }
+
+  .church-section {
+    padding: 20px 14px;
+  }
+
+  .church-tab {
+    padding: 12px 14px;
+  }
+}
+
+/* Celulares muito estreitos */
+@media (max-width: 380px) {
+  .people-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .person-card {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .person-photo {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+/* Formulário de justificativa */
+.justification-form {
+  margin-top: 24px;
+  text-align: left;
+}
+
+.justification-form h3 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 17px;
+}
+
+.justification-form p {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.justification-input {
+  display: block;
+  width: 100%;
+  min-height: 110px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.justification-input:focus {
+  outline: 2px solid #8bb8ff;
+  border-color: var(--blue);
+}
+
+.cancel-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background: #f7f9fc;
+}
+
+
+.meeting-date label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.meeting-date select {
+  width: 100%;
+  max-width: 280px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+}
+
+.meeting-open,
+.meeting-locked {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px !important;
+  font-weight: 800;
+}
+
+.meeting-open {
+  color: #16845b;
+}
+
+.meeting-locked {
+  color: var(--red);
+}
+
+.meeting-notice {
+  margin: 0 0 24px;
+  padding: 16px 18px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #991b1b;
+  background: #fef2f2;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.record-justification {
+  display: block;
+  margin-top: 8px;
+  color: #92400e;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+
+.church-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 24px;
+}
+
+.church-form input {
+  flex: 1;
+  min-width: 220px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+}
+
+.church-form input:focus {
+  outline: 2px solid #8bb8ff;
+  border-color: var(--blue);
+}
+
+.church-form-button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  background: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.church-form-button:hover {
+  background: var(--blue-dark);
+}
+
+
+.church-tab-wrapper {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  border-bottom: 3px solid transparent;
+}
+
+.church-tab-wrapper:has(.church-tab.active) {
+  border-bottom-color: var(--blue);
+}
+
+.church-tab-wrapper .church-tab {
+  border-bottom: none;
+}
+
+.church-edit-button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  place-items: center;
+  margin-right: 6px;
+  border: none;
+  border-radius: 8px;
+  color: var(--blue);
+  background: #eef4ff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.church-edit-button:hover {
+  color: #fff;
+  background: var(--blue);
+}
+
+
+.church-deactivate-button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  place-items: center;
+  margin-right: 6px;
+  border: none;
+  border-radius: 8px;
+  color: #b42332;
+  background: #fff0f1;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+.church-deactivate-button:hover {
+  color: #fff;
+  background: #b42332;
+}
+
+
+.inactive-church-section {
+  margin-top: 24px;
+}
+
+.inactive-church-list {
+  display: grid;
+  gap: 12px;
+}
+
+.inactive-church-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.inactive-church-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inactive-church-item strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.inactive-church-item span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.church-reactivate-button {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border: 1px solid #b7e4cb;
+  border-radius: 8px;
+  color: #166534;
+  background: #dcfce7;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.church-reactivate-button:hover {
+  background: #bbf7d0;
+}
+
+@media (max-width: 480px) {
+  .inactive-church-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
