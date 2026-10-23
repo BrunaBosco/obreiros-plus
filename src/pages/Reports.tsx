@@ -1,6 +1,7 @@
-
 import { useMemo, useState } from 'react'
+import * as XLSX from 'xlsx'
 import type { Attendance, Church, Meeting, Person } from '../types'
+
 
 interface ReportsProps {
   churches: Church[]
@@ -17,6 +18,50 @@ export default function Reports({
 }: ReportsProps) {
   const [churchId, setChurchId] = useState('todas')
   const [search, setSearch] = useState('')
+  
+  const exportToExcel = () => {
+    const rows = report.map((person) => {
+      const church = churches.find(
+        (item) => item.id === person.churchId,
+      )
+
+      return {
+        Obreiro: person.name,
+        Cargo: person.role,
+        Igreja: church?.name ?? 'Não identificada',
+        Presenças: person.presentes,
+        Faltas: person.faltas,
+        'Ausências justificadas': person.ausenciasJustificadas,
+        Frequência:
+          person.frequencia === null
+            ? 'Sem registros suficientes'
+            : `${person.frequencia}%`,
+      }
+    })
+
+    const worksheet = XLSX.utils.json_to_sheet(rows)
+    const workbook = XLSX.utils.book_new()
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      'Frequência',
+    )
+
+    const columnWidths = [
+  { wch: 30 },
+  { wch: 20 },
+  { wch: 30 },
+  { wch: 12 },
+  { wch: 12 },
+  { wch: 25 },
+  { wch: 28 },
+]
+
+worksheet['!cols'] = columnWidths
+
+XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
+  }
 
   const report = useMemo(() => {
     const today = new Date()
@@ -108,7 +153,7 @@ export default function Reports({
         </div>
       </section>
 
-      <section className="flex flex-col gap-3 sm:flex-row">
+      <section className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <select
           value={churchId}
           onChange={(event) => setChurchId(event.target.value)}
@@ -129,6 +174,15 @@ export default function Reports({
           placeholder="Buscar obreiro pelo nome..."
           className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
         />
+            <button
+            type="button"
+            onClick={exportToExcel}
+            disabled={report.length === 0}
+            className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+            Exportar para Excel
+            </button>
+
       </section>
 
       <section className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
