@@ -18,7 +18,9 @@ export default function ChurchTabs({
       aria-label="Selecionar congregação"
       className="flex gap-2 overflow-x-auto border-b border-slate-200"
     >
-      {churches.map((church) => {
+      {churches
+        .filter((church) => church.active !== false)
+        .map((church) => {
         const selected = selectedChurchId === church.id
 
         return (

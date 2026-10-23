@@ -37,9 +37,14 @@ export default function Dashboard({
   onRegisterAttendance: _onRegisterAttendance,
   onSelectPerson,
 }: DashboardProps) {
+
   const [selectedChurchId, setSelectedChurchId] = useState(
-    churches[0]?.id ?? '',
-  )
+  () => churches.find((church) => church.active !== false)?.id ?? '',
+)
+
+const activeChurches = churches.filter(
+  (church) => church.active !== false,
+)
 
   const currentMeeting =
     meetings.find((meeting) => meeting.id === selectedMeetingId) ??
@@ -47,9 +52,13 @@ export default function Dashboard({
       b.date.localeCompare(a.date),
     )[0]
 
-  const churchPeople = people.filter(
-    (person) => person.churchId === selectedChurchId,
-  )
+  const activePeople = people.filter(
+  (person) => person.active !== false,
+)
+
+const churchPeople = activePeople.filter(
+  (person) => person.churchId === selectedChurchId,
+)
 
   const currentAttendance = currentMeeting
     ? attendance.filter(
@@ -64,7 +73,7 @@ export default function Dashboard({
   })
 
   const counts = {
-    total: people.length,
+    total: activePeople.length,
     presentes: currentAttendance.filter(
       (record) => record.status === 'presente',
     ).length,
@@ -74,7 +83,7 @@ export default function Dashboard({
     faltas: currentAttendance.filter(
       (record) => record.status === 'falta',
     ).length,
-    pendentes: people.filter((person) => {
+    pendentes: activePeople.filter((person) => {
       const record = currentAttendance.find(
         (item) => item.personId === person.id,
       )

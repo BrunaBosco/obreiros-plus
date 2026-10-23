@@ -53,11 +53,12 @@ export default function Meetings({
   )
 
   const availableMeetings = suggestions.map((suggestion) => {
-    return (
-      meetings.find((meeting) => meeting.date === suggestion.date) ??
-      suggestion
-    )
-  })
+  const existingMeeting = meetings.find(
+    (meeting) => meeting.date === suggestion.date,
+  )
+
+  return existingMeeting ?? suggestion
+})
 
   return (
     <main className="mx-auto max-w-7xl p-6">

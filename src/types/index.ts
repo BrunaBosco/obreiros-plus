@@ -10,13 +10,16 @@ export interface Church {
   active: boolean
 }
 
+
 export interface Person {
   id: string
   name: string
   role: string
   churchId: string
   photo: string
+  active?: boolean
 }
+
 
 export interface Meeting {
   id: string

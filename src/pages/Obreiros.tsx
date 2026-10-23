@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { Person, Church } from '../types'
@@ -7,7 +8,7 @@ interface ObreirosProps {
   churches: Church[]
   onAddPerson: (person: Omit<Person, 'id'>) => void
   onUpdatePerson: (person: Person) => void
-  onDeletePerson: (personId: string) => void
+  onTogglePerson: (personId: string) => void
 }
 
 const roles = [
@@ -28,25 +29,40 @@ export default function Obreiros({
   churches,
   onAddPerson,
   onUpdatePerson,
-  onDeletePerson,
+  onTogglePerson,
 }: ObreirosProps) {
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
-  const [editingPerson, setEditingPerson] = useState<Person | null>(null)
+  const [editingPerson, setEditingPerson] =
+    useState<Person | null>(null)
   const [name, setName] = useState('')
   const [role, setRole] = useState(roles[0])
-  const [churchId, setChurchId] = useState(churches[0]?.id ?? '')
-  const activeChurches = churches.filter((church) => church.active)
-
-  const filteredPeople = people.filter((person) =>
-    person.name.toLowerCase().includes(search.toLowerCase()),
+  const [churchId, setChurchId] = useState(
+    churches.find((church) => church.active)?.id ?? '',
   )
+  const [showInactive, setShowInactive] = useState(true)
+
+  const activeChurches = churches.filter(
+    (church) => church.active,
+  )
+
+  const filteredPeople = people.filter((person) => {
+    const matchesSearch = person.name
+      .toLowerCase()
+      .includes(search.toLowerCase())
+
+    const matchesStatus = showInactive || person.active !== false
+
+    return matchesSearch && matchesStatus
+  })
 
   function openNewForm() {
     setEditingPerson(null)
     setName('')
     setRole(roles[0])
-    setChurchId(churches[0]?.id ?? '')
+    setChurchId(
+      churches.find((church) => church.active)?.id ?? '',
+    )
     setShowForm(true)
   }
 
@@ -82,6 +98,7 @@ export default function Obreiros({
         role,
         churchId,
         photo: '',
+        active: true,
       })
     }
 
@@ -96,7 +113,7 @@ export default function Obreiros({
             Cadastro de obreiros
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            Consulte, cadastre e edite os obreiros do setor.
+            Consulte, cadastre, edite e gerencie os obreiros do setor.
           </p>
         </div>
 
@@ -164,7 +181,9 @@ export default function Obreiros({
                 <option value="">Selecione a igreja</option>
                 {(editingPerson
                   ? churches.filter(
-                      (church) => church.active || church.id === editingPerson.churchId,
+                      (church) =>
+                        church.active ||
+                        church.id === editingPerson.churchId,
                     )
                   : activeChurches
                 ).map((church) => (
@@ -195,7 +214,7 @@ export default function Obreiros({
         </form>
       )}
 
-      <div className="mb-6">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <input
           type="text"
           value={search}
@@ -203,6 +222,16 @@ export default function Obreiros({
           placeholder="Buscar obreiro pelo nome..."
           className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-500 sm:max-w-md"
         />
+
+        <label className="flex items-center gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={(event) => setShowInactive(event.target.checked)}
+            className="h-4 w-4"
+          />
+          Mostrar obreiros desativados
+        </label>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
@@ -216,11 +245,14 @@ export default function Obreiros({
               const church = churches.find(
                 (item) => item.id === person.churchId,
               )
+              const isActive = person.active !== false
 
               return (
                 <div
                   key={person.id}
-                  className="flex flex-wrap items-center justify-between gap-4 p-4"
+                  className={`flex flex-wrap items-center justify-between gap-4 p-4 ${
+                    !isActive ? 'bg-slate-50 opacity-75' : ''
+                  }`}
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700">
@@ -237,32 +269,51 @@ export default function Obreiros({
                       <p className="text-sm text-slate-500">
                         {church?.name ?? 'Igreja não identificada'}
                       </p>
+                      <span
+                        className={`mt-1 inline-block rounded-full px-2 py-1 text-xs font-semibold ${
+                          isActive
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-slate-200 text-slate-600'
+                        }`}
+                      >
+                        {isActive ? 'Ativo' : 'Desativado'}
+                      </span>
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => openEditForm(person)}
-                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    Editar
-                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openEditForm(person)}
+                      className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Editar
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const confirmed = window.confirm(
-                        `Tem certeza que deseja excluir ${person.name}?`,
-                      )
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const action = isActive
+                          ? 'desativar'
+                          : 'reativar'
 
-                      if (confirmed) {
-                        onDeletePerson(person.id)
-                      }
-                    }}
-                    className="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
-                  >
-                    Excluir
-                  </button>
+                        const confirmed = window.confirm(
+                          `Tem certeza que deseja ${action} ${person.name}?`,
+                        )
+
+                        if (confirmed) {
+                          onTogglePerson(person.id)
+                        }
+                      }}
+                      className={`rounded-lg border px-4 py-2 text-sm font-semibold ${
+                        isActive
+                          ? 'border-red-200 text-red-600 hover:bg-red-50'
+                          : 'border-green-200 text-green-700 hover:bg-green-50'
+                      }`}
+                    >
+                      {isActive ? 'Desativar' : 'Reativar'}
+                    </button>
+                  </div>
                 </div>
               )
             })}
@@ -271,7 +322,7 @@ export default function Obreiros({
       </div>
 
       <p className="mt-4 text-sm text-slate-500">
-        Total de obreiros: {filteredPeople.length}
+        Total de obreiros exibidos: {filteredPeople.length}
       </p>
     </main>
   )

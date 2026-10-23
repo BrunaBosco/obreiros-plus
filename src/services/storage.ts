@@ -45,9 +45,15 @@ export const storage = {
     saveData(KEYS.churches, churches)
   },
 
-  getPeople(): Person[] {
-    return readData(KEYS.people, initialPeople)
-  },
+  
+getPeople(): Person[] {
+  return readData<Person[]>(KEYS.people, initialPeople).map(
+    (person) => ({
+      ...person,
+      active: person.active ?? true,
+    }),
+  )
+},
 
   savePeople(people: Person[]): void {
     saveData(KEYS.people, people)
