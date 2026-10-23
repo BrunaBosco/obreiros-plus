@@ -94,6 +94,19 @@ export default function App() {
     meetings.find((meeting) => meeting.id === selectedMeetingId) ??
     latestMeeting
 
+  function getLocalDateString() {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+const isMeetingLocked = selectedMeeting
+  ? selectedMeeting.date < getLocalDateString()
+  : false
+
   function handleAddChurch(church: Church) {
     const updatedChurches = [...churches, church]
 
@@ -180,6 +193,17 @@ function handleToggleChurch(id: string) {
     status: AttendanceStatus,
     justification: string,
   ) {
+    const meeting = storage.getMeetings().find(
+  (item) => item.id === meetingId,
+)
+
+if (meeting && meeting.date < getLocalDateString()) {
+  window.alert(
+    'Esta reunião está bloqueada para alterações. Não é mais possível modificar a presença.',
+  )
+  return
+}
+
     const existingAttendance = storage.getAttendance()
 
     const existingRecord = existingAttendance.find(
@@ -212,6 +236,13 @@ function handleToggleChurch(id: string) {
     justification: string,
   ) {
     if (!selectedPerson) return
+
+    if (isMeetingLocked) {
+  window.alert(
+    'Esta reunião está bloqueada para alterações. Não é mais possível modificar a presença.',
+  )
+  return
+  } 
 
     let meetingToUse: Meeting | undefined = selectedMeeting
 
@@ -318,6 +349,7 @@ function handleToggleChurch(id: string) {
                 item.personId === selectedPerson.id,
             )?.justification ?? ''
           }
+          isLocked={isMeetingLocked}
           onClose={() => setSelectedPerson(null)}
           onSave={handleSaveAttendance}
         />

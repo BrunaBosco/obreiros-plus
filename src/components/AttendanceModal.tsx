@@ -8,6 +8,7 @@ interface AttendanceModalProps {
   church: Church
   currentStatus: AttendanceStatus
   currentJustification?: string
+  isLocked?: boolean
   onClose: () => void
   onSave: (status: AttendanceStatus, justification: string) => void
 }
@@ -17,16 +18,21 @@ export default function AttendanceModal({
   church,
   currentStatus,
   currentJustification = '',
+  isLocked = false,
   onClose,
   onSave,
 }: AttendanceModalProps) {
   const [selectedStatus, setSelectedStatus] =
     useState<AttendanceStatus>(currentStatus)
+
   const [justification, setJustification] =
     useState(currentJustification)
+
   const [error, setError] = useState('')
 
   function handleSave() {
+    if (isLocked) return
+
     if (selectedStatus === 'pendente') {
       setError('Selecione Presente, Ausente ou Falta.')
       return
@@ -103,14 +109,27 @@ export default function AttendanceModal({
             <h3 className="font-semibold text-slate-900">
               {person.name}
             </h3>
+
             <p className="mt-1 text-sm text-slate-500">
               {person.role}
             </p>
+
             <p className="mt-1 text-sm text-blue-700">
               {church.name}
             </p>
           </div>
         </div>
+
+        {isLocked && (
+          <p
+            role="status"
+            className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-800"
+          >
+            Esta reunião está bloqueada para alterações. O prazo para
+            registrar ou modificar a presença terminou à meia-noite
+            do dia seguinte à reunião.
+          </p>
+        )}
 
         <p className="mb-3 text-sm font-semibold text-slate-700">
           Selecione a situação
@@ -126,7 +145,10 @@ export default function AttendanceModal({
                 key={option.value}
                 type="button"
                 aria-pressed={selected}
+                disabled={isLocked}
                 onClick={() => {
+                  if (isLocked) return
+
                   setSelectedStatus(option.value)
                   setError('')
                 }}
@@ -134,7 +156,7 @@ export default function AttendanceModal({
                   selected
                     ? `${option.style} ring-2 ring-blue-300`
                     : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                }`}
+                } disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 <Icon size={18} />
                 {option.label}
@@ -155,19 +177,23 @@ export default function AttendanceModal({
             <textarea
               id="absence-justification"
               value={justification}
+              disabled={isLocked}
               onChange={(event) => {
                 setJustification(event.target.value)
                 setError('')
               }}
               rows={3}
               placeholder="Informe o motivo da ausência..."
-              className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-70"
             />
           </div>
         )}
 
         {error && (
-          <p role="alert" className="mt-3 text-sm font-medium text-red-600">
+          <p
+            role="alert"
+            className="mt-3 text-sm font-medium text-red-600"
+          >
             {error}
           </p>
         )}
@@ -184,7 +210,8 @@ export default function AttendanceModal({
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800"
+            disabled={isLocked}
+            className="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Confirmar registro
           </button>
