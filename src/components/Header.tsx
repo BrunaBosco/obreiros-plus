@@ -1,7 +1,7 @@
 
 import { CalendarDays, Church, ClipboardList, Users } from 'lucide-react'
 
-type Page = 'reuniao' | 'historico' | 'reunioes' | 'obreiros' | 'igrejas'
+type Page = 'reuniao' | 'historico' | 'reunioes' | 'obreiros' | 'igrejas'| 'relatorios'
 
 interface HeaderProps {
   currentPage: Page
@@ -24,6 +24,7 @@ export default function Header({
     { id: 'historico', label: 'Histórico de Presenças', icon: ClipboardList },
     { id: 'obreiros', label: 'Obreiros', icon: Users },
     { id: 'igrejas', label: 'Igrejas', icon: Church },
+    { id: 'relatorios', label: 'Relatórios de Frequência', icon: ClipboardList },
   ]
 
   return (

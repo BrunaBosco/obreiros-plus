@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import { CalendarDays } from 'lucide-react'
 import SummaryCards from '../components/SummaryCards'
@@ -41,10 +42,10 @@ export default function Dashboard({
   )
 
   const currentMeeting =
-  meetings.find((meeting) => meeting.id === selectedMeetingId) ??
-  [...meetings].sort((a, b) =>
-    b.date.localeCompare(a.date),
-  )[0]
+    meetings.find((meeting) => meeting.id === selectedMeetingId) ??
+    [...meetings].sort((a, b) =>
+      b.date.localeCompare(a.date),
+    )[0]
 
   const churchPeople = people.filter(
     (person) => person.churchId === selectedChurchId,
@@ -62,7 +63,6 @@ export default function Dashboard({
     attendanceByPerson[record.personId] = record.status
   })
 
-  
   const counts = {
     total: people.length,
     presentes: currentAttendance.filter(
@@ -83,7 +83,6 @@ export default function Dashboard({
     }).length,
   }
 
-
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">
       <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -102,7 +101,9 @@ export default function Dashboard({
         <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
           <CalendarDays size={18} className="text-blue-700" />
           {currentMeeting
-            ? new Date(`${currentMeeting.date}T12:00:00`).toLocaleDateString('pt-BR')
+            ? new Date(
+                `${currentMeeting.date}T12:00:00`,
+              ).toLocaleDateString('pt-BR')
             : 'Nenhuma reunião cadastrada'}
         </div>
       </section>
@@ -118,7 +119,9 @@ export default function Dashboard({
 
         <div>
           <h3 className="mb-1 text-lg font-bold text-slate-900">
-            {churches.find((church) => church.id === selectedChurchId)?.name}
+            {churches.find(
+              (church) => church.id === selectedChurchId,
+            )?.name}
           </h3>
           <p className="mb-4 text-sm text-slate-500">
             {churchPeople.length} obreiro(s) nesta congregação
