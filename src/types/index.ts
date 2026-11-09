@@ -1,5 +1,7 @@
 export type AttendanceStatus =
   | 'presente'
+  | 'falta_justificada'
+  | 'falta_nao_justificada'
   | 'ausente'
   | 'falta'
   | 'pendente'

@@ -1,3 +1,4 @@
+
 import type { Attendance, Meeting, Person } from '../types'
 
 interface HistoryTableProps {
@@ -6,26 +7,39 @@ interface HistoryTableProps {
   attendance: Attendance[]
 }
 
-const statusSymbols = {
+const statusSymbols: Record<
+  string,
+  { symbol: string; label: string; className: string }
+> = {
   presente: {
     symbol: 'P',
     label: 'Presente',
     className: 'bg-green-100 text-green-800',
   },
+  falta_justificada: {
+    symbol: 'FJ',
+    label: 'Falta Justificada',
+    className: 'bg-orange-100 text-orange-800',
+  },
+  falta_nao_justificada: {
+    symbol: 'FN',
+    label: 'Falta Não Justificada',
+    className: 'bg-red-100 text-red-800',
+  },
   ausente: {
-    symbol: 'A',
-    label: 'Ausente',
-    className: 'bg-blue-100 text-blue-800',
+    symbol: 'FN',
+    label: 'Falta Não Justificada',
+    className: 'bg-red-100 text-red-800',
   },
   falta: {
-    symbol: 'F',
-    label: 'Falta',
+    symbol: 'FN',
+    label: 'Falta Não Justificada',
     className: 'bg-red-100 text-red-800',
   },
   pendente: {
     symbol: '*',
     label: 'Pendente',
-    className: 'bg-orange-100 text-orange-800',
+    className: 'bg-slate-100 text-slate-500',
   },
 }
 
@@ -42,25 +56,28 @@ export default function HistoryTable({
     a.date.localeCompare(b.date),
   )
 
-  
-function findStatus(personId: string, meetingId: string) {
-  const meeting = meetings.find((item) => item.id === meetingId)
+  function findStatus(personId: string, meetingId: string) {
+    const meeting = meetings.find((item) => item.id === meetingId)
 
-  if (!meeting) return null
+    if (!meeting) return null
 
-  const today = new Date().toISOString().slice(0, 10)
+    const today = new Date()
+    const todayString = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getDate()).padStart(2, '0'),
+    ].join('-')
 
-  if (meeting.date > today) return null
+    if (meeting.date > todayString) return null
 
-  return (
-    attendance.find(
-      (item) =>
-        item.personId === personId &&
-        item.meetingId === meetingId,
-    )?.status ?? 'pendente'
-  )
-}
-
+    return (
+      attendance.find(
+        (item) =>
+          item.personId === personId &&
+          item.meetingId === meetingId,
+      )?.status ?? 'pendente'
+    )
+  }
 
   if (sortedMeetings.length === 0) {
     return (
@@ -116,22 +133,31 @@ function findStatus(personId: string, meetingId: string) {
                 const status = findStatus(person.id, meeting.id)
                 const config = status ? statusSymbols[status] : null
 
+                const record = attendance.find(
+                  (item) =>
+                    item.personId === person.id &&
+                    item.meetingId === meeting.id,
+                )
+
                 return (
                   <td
                     key={meeting.id}
                     className="border-b border-slate-100 px-4 py-3 text-center"
                   >
-                    
-                  {config ? (
-                    <span
-                      title={config.label}
-                      aria-label={`${person.name}: ${config.label} em ${meeting.name}`}
-                      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg font-bold ${config.className}`}
-                    >
-                      {config.symbol}
-                    </span>
-                  ) : null}
-
+                    {config && (
+                      <span
+                        title={
+                          config.label +
+                          (record?.justification
+                            ? `: ${record.justification}`
+                            : '')
+                        }
+                        aria-label={`${person.name}: ${config.label}`}
+                        className={`inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-1 font-bold ${config.className}`}
+                      >
+                        {config.symbol}
+                      </span>
+                    )}
                   </td>
                 )
               })}

@@ -2,7 +2,7 @@
 import {
   Users,
   UserCheck,
-  UserRoundX,
+  ClipboardCheck,
   ClipboardX,
   Clock,
 } from 'lucide-react'
@@ -10,16 +10,16 @@ import {
 interface SummaryCardsProps {
   total: number
   presentes: number
-  ausentes: number
-  faltas: number
+  faltasJustificadas: number
+  faltasNaoJustificadas: number
   pendentes: number
 }
 
 export default function SummaryCards({
   total,
   presentes,
-  ausentes,
-  faltas,
+  faltasJustificadas,
+  faltasNaoJustificadas,
   pendentes,
 }: SummaryCardsProps) {
   const cards = [
@@ -38,15 +38,15 @@ export default function SummaryCards({
       background: 'bg-green-50',
     },
     {
-      label: 'Ausentes',
-      value: ausentes,
-      icon: UserRoundX,
-      color: 'text-slate-600',
-      background: 'bg-slate-100',
+      label: 'Faltas justificadas',
+      value: faltasJustificadas,
+      icon: ClipboardCheck,
+      color: 'text-orange-700',
+      background: 'bg-orange-50',
     },
     {
-      label: 'Faltas',
-      value: faltas,
+      label: 'Faltas não justificadas',
+      value: faltasNaoJustificadas,
       icon: ClipboardX,
       color: 'text-red-700',
       background: 'bg-red-50',
@@ -55,8 +55,8 @@ export default function SummaryCards({
       label: 'Pendentes',
       value: pendentes,
       icon: Clock,
-      color: 'text-orange-700',
-      background: 'bg-orange-50',
+      color: 'text-slate-600',
+      background: 'bg-slate-100',
     },
   ]
 

@@ -7,10 +7,16 @@ import AttendanceHistory from './pages/AttendanceHistory'
 import Reports from './pages/Reports'
 import Obreiros from './pages/Obreiros'
 import Igrejas from './pages/Igrejas'
+import Meetings from './pages/Meetings'
 import { initialChurches, initialPeople } from './data/initialData'
 import { storage } from './services/storage'
-import type {Attendance,AttendanceStatus,Person,Church,} from './types'
-import Meetings from './pages/Meetings'
+import type {
+  Attendance,
+  AttendanceStatus,
+  Person,
+  Church,
+  Meeting,
+} from './types'
 
 type Page =
   | 'reuniao'
@@ -19,6 +25,51 @@ type Page =
   | 'obreiros'
   | 'igrejas'
   | 'relatorios'
+
+function getSecondMonday(year: number, month: number): string {
+  const firstDay = new Date(year, month, 1)
+  const daysUntilMonday = (8 - firstDay.getDay()) % 7
+
+  const secondMonday = new Date(
+    year,
+    month,
+    1 + daysUntilMonday + 7,
+  )
+
+  const yearString = secondMonday.getFullYear()
+  const monthString = String(secondMonday.getMonth() + 1).padStart(2, '0')
+  const dayString = String(secondMonday.getDate()).padStart(2, '0')
+
+  return `${yearString}-${monthString}-${dayString}`
+}
+
+function getOrCreateCurrentMeeting(): Meeting {
+  const savedMeetings = storage.getMeetings()
+
+  const today = new Date()
+  const meetingDate = getSecondMonday(
+    today.getFullYear(),
+    today.getMonth(),
+  )
+
+  const existingMeeting = savedMeetings.find(
+    (meeting) => meeting.date === meetingDate,
+  )
+
+  if (existingMeeting) {
+    return existingMeeting
+  }
+
+  const newMeeting: Meeting = {
+    id: `reuniao-${meetingDate}`,
+    name: 'Reunião de Obreiros',
+    date: meetingDate,
+  }
+
+  storage.saveMeetings([...savedMeetings, newMeeting])
+
+  return newMeeting
+}
 
 export default function App() {
   const [currentPage, setCurrentPage] =
@@ -32,23 +83,15 @@ export default function App() {
     () => storage.getPeople(),
   )
 
- const [meetings, setMeetings] = useState(
-  () => storage.getMeetings(),
-  )
+  const [meetings, setMeetings] = useState(() => {
+  getOrCreateCurrentMeeting()
+  return storage.getMeetings()
+  })
 
   const [selectedMeetingId, setSelectedMeetingId] =
     useState<string | undefined>(() => {
-      const savedMeetings = storage.getMeetings()
-      const today = new Date().toISOString().slice(0, 10)
-
-      return (
-        savedMeetings.find(
-          (meeting) => meeting.date === today,
-        )?.id ??
-        [...savedMeetings].sort((a, b) =>
-          b.date.localeCompare(a.date),
-        )[0]?.id
-      )
+      const currentMeeting = getOrCreateCurrentMeeting()
+      return currentMeeting.id
     })
 
   const [attendance, setAttendance] = useState<Attendance[]>(
@@ -126,17 +169,16 @@ export default function App() {
     setPeople(updatedPeople)
   }
 
-function handleTogglePerson(personId: string) {
-  const updatedPeople = people.map((person) =>
-    person.id === personId
-      ? { ...person, active: person.active === false }
-      : person,
-  )
+  function handleTogglePerson(personId: string) {
+    const updatedPeople = people.map((person) =>
+      person.id === personId
+        ? { ...person, active: person.active === false }
+        : person,
+    )
 
-  storage.savePeople(updatedPeople)
-  setPeople(updatedPeople)
-}
-
+    storage.savePeople(updatedPeople)
+    setPeople(updatedPeople)
+  }
 
   function handleAddChurch(church: Church) {
     const updatedChurches = [...churches, church]
@@ -176,12 +218,13 @@ function handleTogglePerson(personId: string) {
     : fallbackData.people
 
   const currentMeeting =
-  meetings.find(
-    (meeting) => meeting.id === selectedMeetingId,
-  ) ??
-  [...meetings].sort((a, b) =>
-    b.date.localeCompare(a.date),
-  )[0]
+    meetings.find(
+      (meeting) => meeting.id === selectedMeetingId,
+    ) ??
+    [...meetings].sort((a, b) =>
+      b.date.localeCompare(a.date),
+    )[0] ??
+    getOrCreateCurrentMeeting()
 
   const selectedPersonChurch = selectedPerson
     ? displayedChurches.find(
@@ -219,7 +262,7 @@ function handleTogglePerson(personId: string) {
           onSelectPerson={handleSelectPerson}
           selectedMeetingId={selectedMeetingId}
         />
-        ) : currentPage === 'reunioes' ? (
+      ) : currentPage === 'reunioes' ? (
         <Meetings
           meetings={meetings}
           selectedMeetingId={selectedMeetingId}
@@ -229,7 +272,10 @@ function handleTogglePerson(personId: string) {
             )
 
             if (!meetingExists) {
-              const updatedMeetings = [...meetings, meeting]
+              const updatedMeetings = [
+                ...meetings,
+                meeting,
+              ]
 
               storage.saveMeetings(updatedMeetings)
               setMeetings(updatedMeetings)

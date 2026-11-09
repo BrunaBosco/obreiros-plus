@@ -33,32 +33,8 @@ const churchAttendance = attendance.filter(
   (record) => churchPersonIds.has(record.personId),
 )
 
-const today = new Date()
-const currentYear = today.getFullYear()
-const currentMonth = today.getMonth()
-
-const getSecondMonday = (year: number, month: number): string => {
-  const date = new Date(year, month, 1)
-  const daysUntilMonday = (8 - date.getDay()) % 7
-
-  date.setDate(1 + daysUntilMonday + 7)
-
-  const yearString = date.getFullYear()
-  const monthString = String(date.getMonth() + 1).padStart(2, '0')
-  const dayString = String(date.getDate()).padStart(2, '0')
-
-  return `${yearString}-${monthString}-${dayString}`
-}
-
-const validMeetingDates = new Set(
-  Array.from(
-    { length: 12 - currentMonth },
-    (_, index) => getSecondMonday(currentYear, currentMonth + index),
-  ),
-)
-
-const monthlyMeetings = meetings.filter((meeting) =>
-  validMeetingDates.has(meeting.date),
+const monthlyMeetings = [...meetings].sort((a, b) =>
+  b.date.localeCompare(a.date),
 )
 
   const selectedChurch = churches.find(

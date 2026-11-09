@@ -22,8 +22,15 @@ export default function AttendanceModal({
   onClose,
   onSave,
 }: AttendanceModalProps) {
+  const initialStatus: AttendanceStatus =
+    currentStatus === 'ausente'
+      ? 'falta_justificada'
+      : currentStatus === 'falta'
+        ? 'falta_nao_justificada'
+        : currentStatus
+
   const [selectedStatus, setSelectedStatus] =
-    useState<AttendanceStatus>(currentStatus)
+    useState<AttendanceStatus>(initialStatus)
 
   const [justification, setJustification] =
     useState(currentJustification)
@@ -33,13 +40,20 @@ export default function AttendanceModal({
   function handleSave() {
     if (isLocked) return
 
-    if (selectedStatus === 'pendente') {
-      setError('Selecione Presente, Ausente ou Falta.')
+    if (
+      selectedStatus !== 'presente' &&
+      selectedStatus !== 'falta_justificada' &&
+      selectedStatus !== 'falta_nao_justificada'
+    ) {
+      setError('Selecione uma das três situações disponíveis.')
       return
     }
 
-    if (selectedStatus === 'ausente' && !justification.trim()) {
-      setError('Informe a justificativa da ausência.')
+    if (
+      selectedStatus === 'falta_justificada' &&
+      !justification.trim()
+    ) {
+      setError('Informe o motivo da falta justificada.')
       return
     }
 
@@ -54,14 +68,14 @@ export default function AttendanceModal({
       style: 'border-green-200 bg-green-50 text-green-800',
     },
     {
-      value: 'ausente' as const,
-      label: 'Ausente',
+      value: 'falta_justificada' as const,
+      label: 'Falta justificada',
       icon: CircleMinus,
       style: 'border-slate-200 bg-slate-50 text-slate-700',
     },
     {
-      value: 'falta' as const,
-      label: 'Falta',
+      value: 'falta_nao_justificada' as const,
+      label: 'Falta não justificada',
       icon: CircleX,
       style: 'border-red-200 bg-red-50 text-red-800',
     },
@@ -99,11 +113,13 @@ export default function AttendanceModal({
         </div>
 
         <div className="mb-6 flex items-center gap-4">
-          <img
-            src={person.photo}
-            alt={`Foto de ${person.name}`}
-            className="h-20 w-20 rounded-xl object-cover"
-          />
+          {person.photo && (
+            <img
+              src={person.photo}
+              alt={`Foto de ${person.name}`}
+              className="h-20 w-20 rounded-xl object-cover"
+            />
+          )}
 
           <div>
             <h3 className="font-semibold text-slate-900">
@@ -135,7 +151,7 @@ export default function AttendanceModal({
           Selecione a situação
         </p>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3">
           {options.map((option) => {
             const Icon = option.icon
             const selected = selectedStatus === option.value
@@ -148,7 +164,6 @@ export default function AttendanceModal({
                 disabled={isLocked}
                 onClick={() => {
                   if (isLocked) return
-
                   setSelectedStatus(option.value)
                   setError('')
                 }}
@@ -165,13 +180,13 @@ export default function AttendanceModal({
           })}
         </div>
 
-        {selectedStatus === 'ausente' && (
+        {selectedStatus === 'falta_justificada' && (
           <div className="mt-5">
             <label
               htmlFor="absence-justification"
               className="mb-2 block text-sm font-semibold text-slate-700"
             >
-              Justificativa da ausência *
+              Motivo da falta *
             </label>
 
             <textarea
@@ -183,7 +198,7 @@ export default function AttendanceModal({
                 setError('')
               }}
               rows={3}
-              placeholder="Informe o motivo da ausência..."
+              placeholder="Informe o motivo da falta..."
               className="w-full rounded-xl border border-slate-300 p-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-70"
             />
           </div>

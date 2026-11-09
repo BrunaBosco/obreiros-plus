@@ -73,24 +73,32 @@ const churchPeople = activePeople.filter(
   })
 
   const counts = {
-    total: activePeople.length,
-    presentes: currentAttendance.filter(
-      (record) => record.status === 'presente',
-    ).length,
-    ausentes: currentAttendance.filter(
-      (record) => record.status === 'ausente',
-    ).length,
-    faltas: currentAttendance.filter(
-      (record) => record.status === 'falta',
-    ).length,
-    pendentes: activePeople.filter((person) => {
-      const record = currentAttendance.find(
-        (item) => item.personId === person.id,
-      )
+  total: activePeople.length,
 
-      return !record || record.status === 'pendente'
-    }).length,
-  }
+  presentes: currentAttendance.filter(
+    (record) => record.status === 'presente',
+  ).length,
+
+  faltasJustificadas: currentAttendance.filter(
+    (record) =>
+      record.status === 'falta_justificada' ||
+      record.status === 'ausente',
+  ).length,
+
+  faltasNaoJustificadas: currentAttendance.filter(
+    (record) =>
+      record.status === 'falta_nao_justificada' ||
+      record.status === 'falta',
+  ).length,
+
+  pendentes: activePeople.filter((person) => {
+    const record = currentAttendance.find(
+      (item) => item.personId === person.id,
+    )
+
+    return !record || record.status === 'pendente'
+  }).length,
+}
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6">

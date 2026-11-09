@@ -16,12 +16,20 @@ const statusConfig: Record<
     label: 'Presente',
     className: 'bg-green-100 text-green-800',
   },
+  falta_justificada: {
+    label: 'Falta justificada',
+    className: 'bg-orange-100 text-orange-800',
+  },
+  falta_nao_justificada: {
+    label: 'Falta não justificada',
+    className: 'bg-red-100 text-red-800',
+  },
   ausente: {
-    label: 'Ausente',
-    className: 'bg-slate-100 text-slate-700',
+    label: 'Falta justificada',
+    className: 'bg-orange-100 text-orange-800',
   },
   falta: {
-    label: 'Falta',
+    label: 'Falta não justificada',
     className: 'bg-red-100 text-red-800',
   },
   pendente: {

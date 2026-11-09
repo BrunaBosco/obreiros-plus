@@ -1,7 +1,7 @@
+
 import { useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
 import type { Attendance, Church, Meeting, Person } from '../types'
-
 
 interface ReportsProps {
   churches: Church[]
@@ -18,50 +18,6 @@ export default function Reports({
 }: ReportsProps) {
   const [churchId, setChurchId] = useState('todas')
   const [search, setSearch] = useState('')
-  
-  const exportToExcel = () => {
-    const rows = report.map((person) => {
-      const church = churches.find(
-        (item) => item.id === person.churchId,
-      )
-
-      return {
-        Obreiro: person.name,
-        Cargo: person.role,
-        Igreja: church?.name ?? 'Não identificada',
-        Presenças: person.presentes,
-        Faltas: person.faltas,
-        'Ausências justificadas': person.ausenciasJustificadas,
-        Frequência:
-          person.frequencia === null
-            ? 'Sem registros suficientes'
-            : `${person.frequencia}%`,
-      }
-    })
-
-    const worksheet = XLSX.utils.json_to_sheet(rows)
-    const workbook = XLSX.utils.book_new()
-
-    XLSX.utils.book_append_sheet(
-      workbook,
-      worksheet,
-      'Frequência',
-    )
-
-    const columnWidths = [
-  { wch: 30 },
-  { wch: 20 },
-  { wch: 30 },
-  { wch: 12 },
-  { wch: 12 },
-  { wch: 25 },
-  { wch: 28 },
-]
-
-worksheet['!cols'] = columnWidths
-
-XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
-  }
 
   const report = useMemo(() => {
     const today = new Date()
@@ -87,15 +43,22 @@ XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
           (item) => item.status === 'presente',
         ).length
 
-        const faltas = records.filter(
-          (item) => item.status === 'falta',
+        const faltasJustificadas = records.filter(
+          (item) =>
+            item.status === 'falta_justificada' ||
+            item.status === 'ausente',
         ).length
 
-        const ausenciasJustificadas = records.filter(
-          (item) => item.status === 'ausente',
+        const faltasNaoJustificadas = records.filter(
+          (item) =>
+            item.status === 'falta_nao_justificada' ||
+            item.status === 'falta',
         ).length
 
-        const totalConsiderado = presentes + faltas
+        const totalFaltas =
+          faltasJustificadas + faltasNaoJustificadas
+
+        const totalConsiderado = presentes + totalFaltas
 
         const frequencia =
           totalConsiderado > 0
@@ -105,8 +68,9 @@ XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
         return {
           ...person,
           presentes,
-          faltas,
-          ausenciasJustificadas,
+          faltasJustificadas,
+          faltasNaoJustificadas,
+          totalFaltas,
           frequencia,
         }
       })
@@ -125,6 +89,50 @@ XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
     ).length
   }, [meetings])
 
+  const exportToExcel = () => {
+    const rows = report.map((person) => {
+      const church = churches.find(
+        (item) => item.id === person.churchId,
+      )
+
+      return {
+        Obreiro: person.name,
+        Cargo: person.role,
+        Igreja: church?.name ?? 'Não identificada',
+        Presenças: person.presentes,
+        'Faltas justificadas': person.faltasJustificadas,
+        'Faltas não justificadas': person.faltasNaoJustificadas,
+        'Total de faltas': person.totalFaltas,
+        Frequência:
+          person.frequencia === null
+            ? 'Sem registros suficientes'
+            : `${person.frequencia}%`,
+      }
+    })
+
+    const worksheet = XLSX.utils.json_to_sheet(rows)
+    const workbook = XLSX.utils.book_new()
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      'Frequência',
+    )
+
+    worksheet['!cols'] = [
+      { wch: 30 },
+      { wch: 25 },
+      { wch: 30 },
+      { wch: 12 },
+      { wch: 22 },
+      { wch: 25 },
+      { wch: 18 },
+      { wch: 28 },
+    ]
+
+    XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
+  }
+
   return (
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
       <section>
@@ -132,8 +140,8 @@ XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
           Relatórios de Frequência
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Acompanhe a frequência dos obreiros nas reuniões realizadas.
-          Ausências justificadas não reduzem a porcentagem.
+          Acompanhe as presenças e os dois tipos de falta dos obreiros.
+          Todas as faltas entram no cálculo da frequência.
         </p>
       </section>
 
@@ -174,15 +182,15 @@ XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
           placeholder="Buscar obreiro pelo nome..."
           className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
         />
-            <button
-            type="button"
-            onClick={exportToExcel}
-            disabled={report.length === 0}
-            className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-            Exportar para Excel
-            </button>
 
+        <button
+          type="button"
+          onClick={exportToExcel}
+          disabled={report.length === 0}
+          className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Exportar para Excel
+        </button>
       </section>
 
       <section className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
@@ -191,8 +199,9 @@ XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
             <tr>
               <th className="px-4 py-3">Obreiro</th>
               <th className="px-4 py-3">Presenças</th>
-              <th className="px-4 py-3">Faltas</th>
-              <th className="px-4 py-3">Ausências justificadas</th>
+              <th className="px-4 py-3">Faltas justificadas</th>
+              <th className="px-4 py-3">Faltas não justificadas</th>
+              <th className="px-4 py-3">Total de faltas</th>
               <th className="px-4 py-3">Frequência</th>
             </tr>
           </thead>
@@ -206,11 +215,21 @@ XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
                     {person.role}
                   </p>
                 </td>
+
                 <td className="px-4 py-3">{person.presentes}</td>
-                <td className="px-4 py-3">{person.faltas}</td>
+
                 <td className="px-4 py-3">
-                  {person.ausenciasJustificadas}
+                  {person.faltasJustificadas}
                 </td>
+
+                <td className="px-4 py-3">
+                  {person.faltasNaoJustificadas}
+                </td>
+
+                <td className="px-4 py-3 font-semibold">
+                  {person.totalFaltas}
+                </td>
+
                 <td className="px-4 py-3">
                   {person.frequencia === null ? (
                     <span className="text-slate-400">
@@ -234,7 +253,7 @@ XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
             {report.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-4 py-8 text-center text-slate-500"
                 >
                   Nenhum obreiro encontrado.
@@ -246,8 +265,9 @@ XLSX.writeFile(workbook, 'relatorio-frequencia-obreiros.xlsx')
       </section>
 
       <p className="text-xs text-slate-500">
-        Cálculo: presenças ÷ (presenças + faltas) × 100. Reuniões futuras,
-        registros pendentes e ausências justificadas são desconsiderados.
+        Cálculo: presenças ÷ (presenças + faltas justificadas +
+        faltas não justificadas) × 100. Registros pendentes e
+        reuniões futuras são desconsiderados.
       </p>
     </main>
   )
