@@ -39,3 +39,12 @@ export interface Attendance {
   justification: string
   updatedAt: string
 }
+
+export interface Occurrence {
+  id: string
+  name: string
+  churchId: string
+  justification: string
+  date: string
+  responsible: string
+}

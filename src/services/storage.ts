@@ -1,9 +1,9 @@
-
 import type {
   Attendance,
   Church,
   Meeting,
   Person,
+  Occurrence,
 } from '../types'
 
 import {
@@ -16,6 +16,7 @@ const KEYS = {
   people: 'obreiros-plus-obreiros',
   meetings: 'obreiros-plus-reunioes',
   attendance: 'obreiros-plus-presencas',
+  occurrences: 'obreiros-plus-ocorrencias',
 }
 
 function readData<T>(key: string, fallback: T): T {
@@ -74,5 +75,13 @@ getPeople(): Person[] {
   saveAttendance(attendance: Attendance[]): void {
     saveData(KEYS.attendance, attendance)
   },
+
+  getOccurrences(): Occurrence[] {
+  return readData<Occurrence[]>(KEYS.occurrences, [])
+},
+
+saveOccurrences(occurrences: Occurrence[]): void {
+  saveData(KEYS.occurrences, occurrences)
+},
 }
 

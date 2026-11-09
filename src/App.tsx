@@ -8,6 +8,7 @@ import Reports from './pages/Reports'
 import Obreiros from './pages/Obreiros'
 import Igrejas from './pages/Igrejas'
 import Meetings from './pages/Meetings'
+import Ocorrencias from './pages/Ocorrencias'
 import { initialChurches, initialPeople } from './data/initialData'
 import { storage } from './services/storage'
 import type {
@@ -16,6 +17,7 @@ import type {
   Person,
   Church,
   Meeting,
+  Occurrence,
 } from './types'
 
 type Page =
@@ -25,6 +27,7 @@ type Page =
   | 'obreiros'
   | 'igrejas'
   | 'relatorios'
+  | 'ocorrencias'
 
 function getSecondMonday(year: number, month: number): string {
   const firstDay = new Date(year, month, 1)
@@ -83,9 +86,13 @@ export default function App() {
     () => storage.getPeople(),
   )
 
+  const [occurrences, setOccurrences] = useState<Occurrence[]>(
+    () => storage.getOccurrences(),
+  )
+
   const [meetings, setMeetings] = useState(() => {
-  getOrCreateCurrentMeeting()
-  return storage.getMeetings()
+    getOrCreateCurrentMeeting()
+    return storage.getMeetings()
   })
 
   const [selectedMeetingId, setSelectedMeetingId] =
@@ -116,7 +123,6 @@ export default function App() {
     status: AttendanceStatus,
     justification: string,
   ) {
-    
     const meeting = meetings.find((item) => item.id === meetingId)
 
     const today = new Date()
@@ -170,6 +176,18 @@ export default function App() {
 
     storage.savePeople(updatedPeople)
     setPeople(updatedPeople)
+  }
+
+  function handleAddOccurrence(
+    occurrence: Omit<Occurrence, 'id'>,
+  ) {
+    const updatedOccurrences = [
+      ...occurrences,
+      { ...occurrence, id: crypto.randomUUID() },
+    ]
+
+    storage.saveOccurrences(updatedOccurrences)
+    setOccurrences(updatedOccurrences)
   }
 
   function handleUpdatePerson(updatedPerson: Person) {
@@ -327,6 +345,12 @@ export default function App() {
           onAddChurch={handleAddChurch}
           onEditChurch={handleEditChurch}
           onToggleChurch={handleToggleChurch}
+        />
+      ) : currentPage === 'ocorrencias' ? (
+        <Ocorrencias
+          occurrences={occurrences}
+          churches={displayedChurches}
+          onAddOccurrence={handleAddOccurrence}
         />
       ) : (
         <div className="mx-auto max-w-7xl px-4 py-8">
