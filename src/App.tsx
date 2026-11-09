@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import Header from './components/Header'
 import AttendanceModal from './components/AttendanceModal'
@@ -11,6 +10,7 @@ import Meetings from './pages/Meetings'
 import Ocorrencias from './pages/Ocorrencias'
 import { initialChurches, initialPeople } from './data/initialData'
 import { storage } from './services/storage'
+import AgReconhecimento from './pages/AgReconhecimento'
 import type {
   Attendance,
   AttendanceStatus,
@@ -28,6 +28,7 @@ type Page =
   | 'igrejas'
   | 'relatorios'
   | 'ocorrencias'
+  | 'ag-reconhecimento'
 
 function getSecondMonday(year: number, month: number): string {
   const firstDay = new Date(year, month, 1)
@@ -351,6 +352,11 @@ export default function App() {
           occurrences={occurrences}
           churches={displayedChurches}
           onAddOccurrence={handleAddOccurrence}
+        />
+      ) : currentPage === 'ag-reconhecimento' ? (
+        <AgReconhecimento
+          people={displayedPeople}
+          churches={displayedChurches}
         />
       ) : (
         <div className="mx-auto max-w-7xl px-4 py-8">
