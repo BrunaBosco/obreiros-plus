@@ -11,6 +11,7 @@ import Ocorrencias from './pages/Ocorrencias'
 import { initialChurches, initialPeople } from './data/initialData'
 import { storage } from './services/storage'
 import AgReconhecimento from './pages/AgReconhecimento'
+import Aniversariantes from './pages/Aniversariantes'
 import type {
   Attendance,
   AttendanceStatus,
@@ -29,6 +30,7 @@ type Page =
   | 'relatorios'
   | 'ocorrencias'
   | 'ag-reconhecimento'
+  | 'aniversariantes'
 
 function getSecondMonday(year: number, month: number): string {
   const firstDay = new Date(year, month, 1)
@@ -357,6 +359,10 @@ export default function App() {
         <AgReconhecimento
           people={displayedPeople}
           churches={displayedChurches}
+        />
+      ) : currentPage === 'aniversariantes' ? (
+        <Aniversariantes
+          people={displayedPeople}
         />
       ) : (
         <div className="mx-auto max-w-7xl px-4 py-8">
