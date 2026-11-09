@@ -36,6 +36,7 @@ export default function Obreiros({
   const [editingPerson, setEditingPerson] =
     useState<Person | null>(null)
   const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
   const [role, setRole] = useState(roles[0])
   const [churchId, setChurchId] = useState(
     churches.find((church) => church.active)?.id ?? '',
@@ -59,6 +60,7 @@ export default function Obreiros({
   function openNewForm() {
     setEditingPerson(null)
     setName('')
+    setPhone('')
     setRole(roles[0])
     setChurchId(
       churches.find((church) => church.active)?.id ?? '',
@@ -69,6 +71,7 @@ export default function Obreiros({
   function openEditForm(person: Person) {
     setEditingPerson(person)
     setName(person.name)
+    setPhone(person.phone ?? '')
     setRole(person.role)
     setChurchId(person.churchId)
     setShowForm(true)
@@ -78,6 +81,7 @@ export default function Obreiros({
     setShowForm(false)
     setEditingPerson(null)
     setName('')
+    setPhone('')
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -89,12 +93,14 @@ export default function Obreiros({
       onUpdatePerson({
         ...editingPerson,
         name: name.trim(),
+        phone: phone.trim(),
         role,
         churchId,
       })
     } else {
       onAddPerson({
         name: name.trim(),
+        phone: phone.trim(),
         role,
         churchId,
         active: true,
@@ -165,6 +171,20 @@ export default function Obreiros({
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Telefone / WhatsApp
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                placeholder="Digite o telefone com DDD"
+                autoComplete="tel"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+              />
             </div>
 
             <div className="sm:col-span-2">
