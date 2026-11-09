@@ -6,12 +6,14 @@ interface PersonGridProps {
   people: Person[]
   attendanceByPerson: Record<string, AttendanceStatus>
   onSelectPerson: (person: Person) => void
+  canEditAttendance: boolean
 }
 
 export default function PersonGrid({
   people,
   attendanceByPerson,
   onSelectPerson,
+  canEditAttendance
 }: PersonGridProps) {
   const sortedPeople = [...people].sort((a, b) =>
     a.name.localeCompare(b.name, 'pt-BR'),
@@ -38,6 +40,7 @@ export default function PersonGrid({
           person={person}
           status={attendanceByPerson[person.id] ?? 'pendente'}
           onClick={() => onSelectPerson(person)}
+          canEditAttendance={canEditAttendance}
         />
       ))}
     </section>

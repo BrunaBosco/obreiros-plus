@@ -6,6 +6,7 @@ interface PersonCardProps {
   person: Person
   status: AttendanceStatus
   onClick: () => void
+  canEditAttendance: boolean
 }
 
 const statusConfig: Record<
@@ -42,6 +43,7 @@ export default function PersonCard({
   person,
   status,
   onClick,
+  canEditAttendance
 }: PersonCardProps) {
   const isPending = status === 'pendente'
   const config = statusConfig[status]
@@ -50,7 +52,12 @@ export default function PersonCard({
     <button
       type="button"
       onClick={onClick}
-      className="group w-full overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
+      disabled={!canEditAttendance}
+      className={`group w-full overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-sm transition ${
+        canEditAttendance
+          ? 'hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md'
+          : 'cursor-not-allowed opacity-80'
+      }`}
     >
       <div className="relative aspect-square overflow-hidden bg-slate-100">
         {person.photo ? (
@@ -85,7 +92,7 @@ export default function PersonCard({
         </p>
 
         <p className="mt-3 text-sm font-medium text-blue-700 group-hover:text-blue-900">
-          Registrar presença →
+          {canEditAttendance ? 'Registrar presença →' : 'Somente consulta'}
         </p>
       </div>
     </button>

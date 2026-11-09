@@ -52,6 +52,15 @@ const activeChurches = churches.filter(
       b.date.localeCompare(a.date),
     )[0]
 
+  const today = new Date()
+  const todayString = [
+    today.getFullYear(),
+    String(today.getMonth() + 1).padStart(2, '0'),
+    String(today.getDate()).padStart(2, '0'),
+  ].join('-')
+
+const canEditAttendance = currentMeeting?.date === todayString
+
   const activePeople = people.filter(
   (person) => person.active !== false,
 )
@@ -148,6 +157,7 @@ const churchPeople = activePeople.filter(
             people={churchPeople}
             attendanceByPerson={attendanceByPerson}
             onSelectPerson={onSelectPerson}
+            canEditAttendance={canEditAttendance}
           />
         </div>
       </section>

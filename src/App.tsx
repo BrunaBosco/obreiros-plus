@@ -116,6 +116,20 @@ export default function App() {
     status: AttendanceStatus,
     justification: string,
   ) {
+    
+    const meeting = meetings.find((item) => item.id === meetingId)
+
+    const today = new Date()
+    const todayString = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getDate()).padStart(2, '0'),
+    ].join('-')
+
+    if (!meeting || meeting.date !== todayString) {
+      return
+    }
+
     const existingAttendance = attendance.filter(
       (item) =>
         !(
