@@ -112,28 +112,18 @@ export default function AttendanceModal({
           </button>
         </div>
 
-        <div className="mb-6 flex items-center gap-4">
-          {person.photo && (
-            <img
-              src={person.photo}
-              alt={`Foto de ${person.name}`}
-              className="h-20 w-20 rounded-xl object-cover"
-            />
-          )}
+        <div className="mb-6">
+          <h3 className="font-semibold text-slate-900">
+            {person.name}
+          </h3>
 
-          <div>
-            <h3 className="font-semibold text-slate-900">
-              {person.name}
-            </h3>
+          <p className="mt-1 text-sm text-slate-500">
+            {person.role}
+          </p>
 
-            <p className="mt-1 text-sm text-slate-500">
-              {person.role}
-            </p>
-
-            <p className="mt-1 text-sm text-blue-700">
-              {church.name}
-            </p>
-          </div>
+          <p className="mt-1 text-sm text-blue-700">
+            {church.name}
+          </p>
         </div>
 
         {isLocked && (

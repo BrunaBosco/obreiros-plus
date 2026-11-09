@@ -18,7 +18,6 @@ export interface Person {
   name: string
   role: string
   churchId: string
-  photo: string
   active?: boolean
 }
 

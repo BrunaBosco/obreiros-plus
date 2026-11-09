@@ -52,13 +52,13 @@ export default function Meetings({
     },
   )
 
-  const availableMeetings = suggestions.map((suggestion) => {
-  const existingMeeting = meetings.find(
-    (meeting) => meeting.date === suggestion.date,
-  )
-
-  return existingMeeting ?? suggestion
-})
+  const availableMeetings = [
+  ...meetings,
+  ...suggestions.filter(
+    (suggestion) =>
+      !meetings.some((meeting) => meeting.date === suggestion.date),
+  ),
+].sort((a, b) => a.date.localeCompare(b.date))
 
   return (
     <main className="mx-auto max-w-7xl p-6">

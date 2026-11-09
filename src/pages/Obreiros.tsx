@@ -97,7 +97,6 @@ export default function Obreiros({
         name: name.trim(),
         role,
         churchId,
-        photo: '',
         active: true,
       })
     }
