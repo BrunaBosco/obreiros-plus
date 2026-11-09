@@ -20,6 +20,7 @@ export interface Person {
   churchId: string
   phone?: string
   active?: boolean
+  birthDate?: string
 }
 
 

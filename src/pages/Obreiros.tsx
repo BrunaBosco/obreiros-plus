@@ -22,6 +22,7 @@ const roles = [
   'Presbítero Ag. Reconhecimento',
   'Evangelista Ag. Reconhecimento',
   'Pastor Ag. Reconhecimento',
+  'Dirigente'
 ]
 
 export default function Obreiros({
@@ -37,6 +38,7 @@ export default function Obreiros({
     useState<Person | null>(null)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [birthDate, setBirthDate] = useState('')
   const [role, setRole] = useState(roles[0])
   const [churchId, setChurchId] = useState(
     churches.find((church) => church.active)?.id ?? '',
@@ -61,6 +63,7 @@ export default function Obreiros({
     setEditingPerson(null)
     setName('')
     setPhone('')
+    setBirthDate('')
     setRole(roles[0])
     setChurchId(
       churches.find((church) => church.active)?.id ?? '',
@@ -72,6 +75,7 @@ export default function Obreiros({
     setEditingPerson(person)
     setName(person.name)
     setPhone(person.phone ?? '')
+    setBirthDate(person.birthDate ?? '')
     setRole(person.role)
     setChurchId(person.churchId)
     setShowForm(true)
@@ -82,18 +86,20 @@ export default function Obreiros({
     setEditingPerson(null)
     setName('')
     setPhone('')
+    setBirthDate('')
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!name.trim() || !role || !churchId) return
+    if (!name.trim() || !role || !churchId || (role === 'Dirigente' && !birthDate)) return
 
     if (editingPerson) {
       onUpdatePerson({
         ...editingPerson,
         name: name.trim(),
         phone: phone.trim(),
+        birthDate: birthDate || undefined,
         role,
         churchId,
       })
@@ -101,6 +107,7 @@ export default function Obreiros({
       onAddPerson({
         name: name.trim(),
         phone: phone.trim(),
+        birthDate: birthDate || undefined,
         role,
         churchId,
         active: true,
@@ -186,6 +193,21 @@ export default function Obreiros({
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
               />
             </div>
+
+            {role === 'Dirigente' && (
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Data de nascimento *
+                </label>
+                <input
+                  type="date"
+                  value={birthDate}
+                  onChange={(event) => setBirthDate(event.target.value)}
+                  required
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                />
+              </div>
+            )}
 
             <div className="sm:col-span-2">
               <label className="mb-2 block text-sm font-medium text-slate-700">
