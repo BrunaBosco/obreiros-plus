@@ -27,9 +27,9 @@ const statusSymbols: Record<
     className: 'bg-red-100 text-red-800',
   },
   ausente: {
-    symbol: 'FN',
-    label: 'Falta Não Justificada',
-    className: 'bg-red-100 text-red-800',
+  symbol: 'FJ',
+  label: 'Falta Justificada',
+  className: 'bg-orange-100 text-orange-800',
   },
   falta: {
     symbol: 'FN',
