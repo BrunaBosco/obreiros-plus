@@ -11,6 +11,7 @@ import type {
   Meeting,
   Person,
 } from '../types'
+import type { AccessProfile } from '../services/auth'
 
 interface DashboardProps {
   churches: Church[]
@@ -26,6 +27,7 @@ interface DashboardProps {
     justification: string,
   ) => void
   onSelectPerson: (person: Person) => void
+  profile: AccessProfile
 }
 
 export default function Dashboard({
@@ -34,6 +36,7 @@ export default function Dashboard({
   meetings,
   attendance,
   selectedMeetingId,
+  profile,
   onRegisterAttendance: _onRegisterAttendance,
   onSelectPerson,
 }: DashboardProps) {
@@ -59,7 +62,9 @@ const activeChurches = churches.filter(
     String(today.getDate()).padStart(2, '0'),
   ].join('-')
 
-const canEditAttendance = currentMeeting?.date === todayString
+const canEditAttendance =
+  (profile.role === 'adm' || profile.role === 'livre') &&
+  currentMeeting?.date === todayString
 
   const activePeople = people.filter(
   (person) => person.active !== false,

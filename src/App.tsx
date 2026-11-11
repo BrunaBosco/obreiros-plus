@@ -1,4 +1,7 @@
-import { useState } from 'react'
+
+import { useEffect, useState } from 'react'
+
+import Login from './pages/Login'
 import Header from './components/Header'
 import AttendanceModal from './components/AttendanceModal'
 import Dashboard from './pages/Dashboard'
@@ -8,10 +11,19 @@ import Obreiros from './pages/Obreiros'
 import Igrejas from './pages/Igrejas'
 import Meetings from './pages/Meetings'
 import Ocorrencias from './pages/Ocorrencias'
-import { initialChurches, initialPeople } from './data/initialData'
-import { storage } from './services/storage'
 import AgReconhecimento from './pages/AgReconhecimento'
 import Aniversariantes from './pages/Aniversariantes'
+
+import { initialChurches, initialPeople } from './data/initialData'
+import { storage } from './services/storage'
+
+import {
+  getCurrentProfile,
+  signOut,
+} from './services/auth'
+
+import type { AccessProfile } from './services/auth'
+
 import type {
   Attendance,
   AttendanceStatus,
@@ -31,6 +43,21 @@ type Page =
   | 'ocorrencias'
   | 'ag-reconhecimento'
   | 'aniversariantes'
+
+const pagePermissions: Record<
+  Page,
+  AccessProfile['role'][]
+> = {
+  reuniao: ['adm', 'livre'],
+  historico: ['adm', 'pastor_setorial'],
+  reunioes: ['adm'],
+  obreiros: ['adm'],
+  igrejas: ['adm'],
+  relatorios: ['adm', 'pastor_setorial'],
+  ocorrencias: ['adm', 'livre'],
+  'ag-reconhecimento': ['adm', 'pastor_setorial'],
+  aniversariantes: ['adm', 'pastor_setorial'],
+}
 
 function getSecondMonday(year: number, month: number): string {
   const firstDay = new Date(year, month, 1)
@@ -78,8 +105,55 @@ function getOrCreateCurrentMeeting(): Meeting {
 }
 
 export default function App() {
-  const [currentPage, setCurrentPage] =
-    useState<Page>('reuniao')
+  const [profile, setProfile] = useState<AccessProfile | null>(null)
+  const [checkingSession, setCheckingSession] = useState(true)
+
+  const [currentPage, setCurrentPage] = useState<Page>('reuniao')
+
+  useEffect(() => {
+    if (!profile) return
+
+    const allowedRoles = pagePermissions[currentPage]
+
+    if (!allowedRoles.includes(profile.role)) {
+      setCurrentPage(
+        profile.role === 'pastor_setorial'
+          ? 'historico'
+          : 'reuniao',
+      )
+    }
+  }, [profile, currentPage])
+
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        const currentProfile = await getCurrentProfile()
+        setProfile(currentProfile)
+      } catch (error) {
+        console.error('Erro ao verificar sessão:', error)
+        setProfile(null)
+      } finally {
+        setCheckingSession(false)
+      }
+    }
+
+    checkSession()
+  }, [])
+
+  function handleLogin(accessProfile: AccessProfile) {
+    setProfile(accessProfile)
+    setCurrentPage('reuniao')
+  }
+
+  async function handleLogout() {
+    try {
+      await signOut()
+      setProfile(null)
+      setCurrentPage('reuniao')
+    } catch (error) {
+      console.error('Erro ao sair:', error)
+    }
+  }
 
   const [churches, setChurches] = useState(
     () => storage.getChurches(),
@@ -126,6 +200,10 @@ export default function App() {
     status: AttendanceStatus,
     justification: string,
   ) {
+    if (!profile || !['adm', 'livre'].includes(profile.role)) {
+      return
+    }
+
     const meeting = meetings.find((item) => item.id === meetingId)
 
     const today = new Date()
@@ -184,10 +262,40 @@ export default function App() {
   function handleAddOccurrence(
     occurrence: Omit<Occurrence, 'id'>,
   ) {
+    if (!profile || !['adm', 'livre'].includes(profile.role)) {
+      return
+    }
+
     const updatedOccurrences = [
       ...occurrences,
       { ...occurrence, id: crypto.randomUUID() },
     ]
+
+    storage.saveOccurrences(updatedOccurrences)
+    setOccurrences(updatedOccurrences)
+  }
+
+  function handleUpdateOccurrence(occurrence: Occurrence) {
+    if (!profile || profile.role !== 'adm') {
+      return
+    }
+
+    const updatedOccurrences = occurrences.map((item) =>
+      item.id === occurrence.id ? occurrence : item,
+    )
+
+    storage.saveOccurrences(updatedOccurrences)
+    setOccurrences(updatedOccurrences)
+  }
+
+  function handleDeleteOccurrence(occurrenceId: string) {
+    if (!profile || profile.role !== 'adm') {
+      return
+    }
+
+    const updatedOccurrences = occurrences.filter(
+      (item) => item.id !== occurrenceId,
+    )
 
     storage.saveOccurrences(updatedOccurrences)
     setOccurrences(updatedOccurrences)
@@ -273,6 +381,18 @@ export default function App() {
       item.personId === selectedPerson?.id,
   )
 
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-slate-600">Verificando acesso...</p>
+      </div>
+    )
+  }
+
+  if (!profile) {
+    return <Login onLogin={handleLogin} />
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Header
@@ -285,6 +405,8 @@ export default function App() {
               ).toLocaleDateString('pt-BR')
             : 'Nenhuma reunião cadastrada'
         }
+        profile={profile}
+        onLogout={handleLogout}
       />
 
       {currentPage === 'reuniao' ? (
@@ -295,6 +417,7 @@ export default function App() {
           attendance={attendance}
           onRegisterAttendance={handleRegisterAttendance}
           onSelectPerson={handleSelectPerson}
+          profile={profile}
           selectedMeetingId={selectedMeetingId}
         />
       ) : currentPage === 'reunioes' ? (
@@ -353,7 +476,10 @@ export default function App() {
         <Ocorrencias
           occurrences={occurrences}
           churches={displayedChurches}
+          profile={profile}
           onAddOccurrence={handleAddOccurrence}
+          onUpdateOccurrence={handleUpdateOccurrence}
+          onDeleteOccurrence={handleDeleteOccurrence}
         />
       ) : currentPage === 'ag-reconhecimento' ? (
         <AgReconhecimento
